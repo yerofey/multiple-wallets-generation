@@ -2,31 +2,24 @@ const fs = require('fs');
 const path = require('path');
 const execSync = require('child_process').execSync;
 const bip39 = require('bip39');
-const pkutils = require('ethereum-mnemonic-privatekey-utils');
-const { Account } = require('eth-lib/lib');
 const { fromMnemonic, fromZPrv } = require('ethereum-bip84');
-const pad = (num, size, symbol = '0') => {
-    num = num.toString();
-    while (num.length < size) {
-        num = symbol + num;
-    }
-    return num;
-}
+const randomFloat = (min, max, decimals) => (Math.random() * (min - max) + max).toFixed(decimals);
 
-const file = `.${path.sep}wallets.txt`;
+const file = `.${path.sep}wallets-disperse.txt`;
 const debug = false;
 const accountFirstIndex = 0;
-const accountLastIndex = accountFirstIndex + 1; // number of accounts
+const accountLastIndex = accountFirstIndex + 10; // number of accounts
 const accountWalletsFirstIndex = 0;
-const accountWalletsLastIndex = accountWalletsFirstIndex + 100; // number of wallets per account
+const accountWalletsLastIndex = accountWalletsFirstIndex + 99; // number of wallets per account
+const walletReceiveMinAmount = 100_000;
+const walletReceiveMaxAmount = 1_000_000_000;
+const walletReceiveDecimals = 16;
 
 if (debug) {
     console.time('runtime');
 }
 
 const mnemonic = bip39.generateMnemonic();
-const privateKey = pkutils.getPrivateKeyFromMnemonic(mnemonic);
-const account = Account.fromPrivate('0x' + privateKey);
 
 fs.writeFileSync(file, '');
 fs.appendFileSync(file, mnemonic + "\n\n");
@@ -36,9 +29,9 @@ for (let accountId = accountFirstIndex; accountId < accountLastIndex; accountId+
     const child = root.deriveAccount(accountId);
     const account = new fromZPrv(child);
     for (let walletId = accountWalletsFirstIndex; walletId <= accountWalletsLastIndex; walletId++) {
-        const accountWalletId = accountId + '_' + pad(walletId, 2);
-        const walletLine = `${accountWalletId} ${account.getAddress(walletId)} ${account.getPrivateKey(walletId)}`;
-        fs.appendFileSync(file, walletLine + "\n");
+        const randomAmount = randomFloat(walletReceiveMinAmount, walletReceiveMaxAmount, walletReceiveDecimals);
+        const sendTokensLine = `${account.getAddress(walletId)} ${randomAmount}`;
+        fs.appendFileSync(file, sendTokensLine + "\n");
     }
 }
 
