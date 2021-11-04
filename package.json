@@ -1,0 +1,13 @@
+{
+  "name": "multiple-wallets-generation",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Yerofey S. <pm@yerofey.dev>",
+  "license": "MIT",
+  "dependencies": {
+    "bip39": "^3.0.4",
+    "eth-lib": "^0.1.29",
+    "ethereum-bip84": "^0.0.3",
+    "ethereum-mnemonic-privatekey-utils": "^1.0.5"
+  }
+}
